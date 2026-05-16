@@ -148,7 +148,7 @@ papaya,papaya,True
 banana,banana,True
 orange,orange,True
 pigeonpeas,pigeonpeas,True
-lentil,lentil,True
+lentil,mungbean,False
 maize,maize,True
 chickpea,chickpea,True
 cotton,cotton,True
@@ -174,10 +174,10 @@ coconut,coconut,True
 muskmelon,muskmelon,True
 grapes,grapes,True
 cotton,cotton,True
-lentil,lentil,True
+lentil,mungbean,False
 pigeonpeas,pigeonpeas,True
 chickpea,chickpea,True
-blackgram,maize,False
+blackgram,blackgram,True
 mothbeans,mothbeans,True
 apple,apple,True
 muskmelon,muskmelon,True
@@ -316,7 +316,7 @@ muskmelon,muskmelon,True
 orange,orange,True
 maize,maize,True
 banana,banana,True
-pigeonpeas,pigeonpeas,True
+pigeonpeas,blackgram,False
 jute,jute,True
 apple,apple,True
 lentil,lentil,True
