@@ -99,11 +99,13 @@ class CropPreprocessor:
         # Encode
         y = self.encode_target(y)
 
+        # Train/test split
+        X_train, X_test, y_train, y_test = self.split_dataset(X, y)
+
         # Scale
         X = self.scale_features(X)
 
-        # Train/test split
-        X_train, X_test, y_train, y_test = self.split_dataset(X, y)
+        
 
         return {
             "X_train": X_train,
