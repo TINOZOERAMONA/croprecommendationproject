@@ -103,8 +103,8 @@ class CropPreprocessor:
         X_train, X_test, y_train, y_test = self.split_dataset(X, y)
 
         # Scale
-        X = self.scale_features(X)
-
+        X_train = self.scaler.fit_transform(X_train)
+        X_test = self.scaler.transform(X_test)
         
 
         return {
