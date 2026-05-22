@@ -5,7 +5,7 @@ Data preprocessing module for Crop Recommendation System
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-
+from src.config import TEST_SIZE, RANDOM_STATE, CLEAN_DATA_PATH
 
 class CropPreprocessor:
 
@@ -69,8 +69,8 @@ class CropPreprocessor:
         return train_test_split(
             X,
             y,
-            test_size=0.2,
-            random_state=42,
+            test_size=TEST_SIZE,
+            random_state=RANDOM_STATE,
             stratify=y
         )
 
@@ -90,7 +90,7 @@ class CropPreprocessor:
         # Save cleaned dataset
         self.save_cleaned_data(
             df,
-            "data/processed/cleaned_crop_data.csv"
+            CLEAN_DATA_PATH
         )
 
         # Split
