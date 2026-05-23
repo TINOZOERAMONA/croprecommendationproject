@@ -12,7 +12,6 @@ class CropPreprocessor:
     def __init__(self):
         self.scaler = StandardScaler()
         self.label_encoder = LabelEncoder()
-
     
     #loading dataset
     def load_dataset(self, file_path):

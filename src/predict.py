@@ -1,11 +1,17 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import joblib
 import pandas as pd
 import numpy as np
-
 from src.config import (
     MODEL_OUTPUT_PATH,
     SCALER_OUTPUT_PATH,
     LABEL_ENCODER_OUTPUT_PATH
+)
+from src.nlp_engine import (
+    extract_features_bert,
+    generate_feature_vector
 )
 
 # Load saved artifacts
@@ -17,28 +23,29 @@ label_encoder = joblib.load(
     LABEL_ENCODER_OUTPUT_PATH
 )
 
-# Example input:
-# N, P, K, temperature, humidity, ph, rainfall
+def run_prediction():
+    print("\n🌾 Crop Recommendation System (CLI Mode)")
+    print("Type farming conditions in natural language\n")
 
-sample_data = pd.DataFrame([{
-    "N": 90,
-    "P": 42,
-    "K": 43,
-    "temperature": 20.87,
-    "humidity": 82.00,
-    "ph": 6.5,
-    "rainfall": 202.93
-}])
+    query = input("Farmer Input: ")
 
-# Scale input
-scaled_data = scaler.transform(sample_data)
+    # STEP 1: NLP → structured features
+    extracted, scores = extract_features_bert(query)
 
-# Predict
-prediction = model.predict(scaled_data)
+    # STEP 2: feature vector
+    X = generate_feature_vector(extracted)
 
-# Decode prediction
-crop_name = label_encoder.inverse_transform(
-    prediction
-)
+    # STEP 3: scale (VERY IMPORTANT — must match training)
+    X_scaled = scaler.transform(X)
 
-print(f"Recommended Crop: {crop_name[0]}")
+    # STEP 4: predict
+    pred = model.predict(X_scaled)[0]
+    crop = label_encoder.inverse_transform([pred])[0]
+
+    print("\n==============================")
+    print("🌱 Recommended Crop:", crop)
+    print("==============================\n")
+
+
+if __name__ == "__main__":
+    run_prediction()
