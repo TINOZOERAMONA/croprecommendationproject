@@ -24,7 +24,7 @@ label_encoder = joblib.load(
 )
 
 def run_prediction():
-    print("\n🌾 Crop Recommendation System (CLI Mode)")
+    print("The Crop Recommendation System (CLI Mode)")
     print("Type farming conditions in natural language\n")
 
     query = input("Farmer Input: ")
@@ -43,7 +43,7 @@ def run_prediction():
     crop = label_encoder.inverse_transform([pred])[0]
 
     print("\n==============================")
-    print("🌱 Recommended Crop:", crop)
+    print("The Recommended Crop:", crop)
     print("==============================\n")
 
 
