@@ -177,6 +177,12 @@ def generate_feature_vector(extracted):
         'soil_high_nitrogen': 100,
     }
 
+    PK_MAP = {
+    'soil_low_nitrogen': {'P': 67, 'K': 40},
+    'soil_medium_nitrogen': {'P': 53, 'K': 35},
+    'soil_high_nitrogen': {'P': 45, 'K': 40},
+    }
+
     TEMPERATURE_MAP = {
         'temp_very_cold': 12.0,
         'temp_cool': 20.0,
@@ -209,7 +215,13 @@ def generate_feature_vector(extracted):
     }
 
     if extracted.get('nitrogen'):
-        N = NITROGEN_MAP.get(extracted['nitrogen'], N)
+        nitrogen_intent = extracted['nitrogen']
+    
+        N = NITROGEN_MAP.get(nitrogen_intent, N)
+    
+        if nitrogen_intent in PK_MAP:
+            P = PK_MAP[nitrogen_intent]['P']
+            K = PK_MAP[nitrogen_intent]['K']
 
     if extracted.get('temperature'):
         temperature = TEMPERATURE_MAP.get(extracted['temperature'], temperature)
@@ -224,3 +236,82 @@ def generate_feature_vector(extracted):
         ph = PH_MAP.get(extracted['ph'], ph)
 
     return [[N, P, K, temperature, humidity, ph, rainfall]]
+
+label_descriptions = {
+    'soil_low_nitrogen':    'low-nitrogen soil',
+    'soil_medium_nitrogen': 'medium-nitrogen soil',
+    'soil_high_nitrogen':   'high-nitrogen fertile soil',
+
+    'temp_very_cold': 'very cold climate (<15°C)',
+    'temp_cool':      'cool climate (~20°C)',
+    'temp_warm':      'warm climate (~25°C)',
+    'temp_hot':       'hot climate (~31°C)',
+    'temp_very_hot':  'very hot climate (>35°C)',
+
+    'humidity_very_low':  'very low humidity (<20%)',
+    'humidity_low':       'low humidity (~52%)',
+    'humidity_moderate':  'moderate humidity (~65%)',
+    'humidity_high':      'high humidity (~82%)',
+    'humidity_very_high': 'very high humidity (~93%)',
+
+    'rainfall_very_low':  'very low rainfall (~28mm)',
+    'rainfall_low':       'low rainfall (~52mm)',
+    'rainfall_moderate':  'moderate rainfall (~94mm)',
+    'rainfall_high':      'high rainfall (~160mm)',
+    'rainfall_very_high': 'very high rainfall (~240mm)',
+
+    'ph_acidic':          'acidic soil (pH ~5.0)',
+    'ph_slightly_acidic': 'slightly acidic soil (pH ~6.0)',
+    'ph_neutral':         'neutral soil (pH ~6.5)',
+    'ph_alkaline':        'alkaline soil (pH ~7.5)',
+}
+
+
+def recommend_crops_bert(
+        query,
+        rf_model,
+        encoder,
+        top_n=3,
+        threshold=0.30):
+
+    # Step 1: Extract intents
+    extracted, scores = extract_features_bert(
+        query,
+        threshold=threshold
+    )
+
+    # Step 2: Build feature vector
+    feature_vector = generate_feature_vector(extracted)
+
+    # Step 3: Get probabilities
+    probabilities = rf_model.predict_proba(feature_vector)[0]
+
+    # Step 4: Top N predictions
+    top_indices = np.argsort(probabilities)[-top_n:][::-1]
+
+    recommendations = []
+
+    for idx in top_indices:
+        crop = encoder.inverse_transform([idx])[0]
+        confidence = round(probabilities[idx] * 100, 2)
+
+        recommendations.append({
+            "crop": crop,
+            "confidence": confidence
+        })
+
+    # Step 5: Explanations
+    explanations = []
+
+    for category, intent in extracted.items():
+        if intent and intent in label_descriptions:
+            explanations.append(
+                f"Detected {category}: {label_descriptions[intent]}"
+            )
+
+    if not explanations:
+        explanations.append(
+            "Using dataset average conditions (no specific features detected)"
+        )
+
+    return recommendations, extracted, explanations
