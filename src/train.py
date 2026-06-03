@@ -112,17 +112,42 @@ def train_models():
 
     results.append(xgb_metrics)
 
-    # Save models
-    joblib.dump(rf_model, MODEL_OUTPUT_PATH)
-    joblib.dump(preprocessor.scaler, SCALER_OUTPUT_PATH)
-    joblib.dump(
-        preprocessor.label_encoder,
-        LABEL_ENCODER_OUTPUT_PATH
-    )
+    models_dict = {
+    "RandomForest": rf_model,
+    "KNN": knn_model,
+    "XGBoost": xgb_model
+    }
 
     # Save report
     df = pd.DataFrame(results)
 
+    best_model_name = df.loc[
+    df["F1_Score"].idxmax()
+    ]["Model"]
+
+    best_model_object = models_dict[
+        best_model_name
+    ]
+
+    print(
+        f"The winning model is "
+        f"{best_model_name}! Saving..."
+    )
+    joblib.dump(
+    best_model_object,
+    MODEL_OUTPUT_PATH
+    )
+
+    joblib.dump(
+        preprocessor.scaler,
+        SCALER_OUTPUT_PATH
+    )
+
+    joblib.dump(
+        preprocessor.label_encoder,
+        LABEL_ENCODER_OUTPUT_PATH
+    )
+    
     df = df[[
         "Model",
         "Accuracy",

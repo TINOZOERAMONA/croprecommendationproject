@@ -10,8 +10,7 @@ from src.config import (
     LABEL_ENCODER_OUTPUT_PATH
 )
 from src.nlp_engine import (
-    extract_features_bert,
-    generate_feature_vector
+    recommend_crops_bert
 )
 
 # Load saved artifacts
@@ -29,23 +28,29 @@ def run_prediction():
 
     query = input("Farmer Input: ")
 
-    # STEP 1: NLP → structured features
-    extracted, scores = extract_features_bert(query)
-
-    # STEP 2: feature vector
-    X = generate_feature_vector(extracted)
-
-    # STEP 3: scale (VERY IMPORTANT — must match training)
-    X_scaled = scaler.transform(X)
-
-    # STEP 4: predict
-    pred = model.predict(X_scaled)[0]
-    crop = label_encoder.inverse_transform([pred])[0]
+    recommendations, extracted, explanations = recommend_crops_bert(
+    query,
+    model,
+    label_encoder,
+    scaler
+    )
 
     print("\n==============================")
-    print("The Recommended Crop:", crop)
+    print("Top Recommended Crops")
     print("==============================\n")
 
+    for i, rec in enumerate(recommendations, 1):
+        print(
+            f"{i}. {rec['crop']} "
+            f"({rec['confidence']}%)"
+        )
+
+    print("\nReasoning:")
+
+    for reason in explanations:
+        print(f"- {reason}")
+
+    print()
 
 if __name__ == "__main__":
     run_prediction()

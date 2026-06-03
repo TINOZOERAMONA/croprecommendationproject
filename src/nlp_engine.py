@@ -216,9 +216,9 @@ def generate_feature_vector(extracted):
 
     if extracted.get('nitrogen'):
         nitrogen_intent = extracted['nitrogen']
-    
+
         N = NITROGEN_MAP.get(nitrogen_intent, N)
-    
+
         if nitrogen_intent in PK_MAP:
             P = PK_MAP[nitrogen_intent]['P']
             K = PK_MAP[nitrogen_intent]['K']
@@ -271,6 +271,7 @@ def recommend_crops_bert(
         query,
         rf_model,
         encoder,
+        scaler,
         top_n=3,
         threshold=0.30):
 
@@ -282,6 +283,8 @@ def recommend_crops_bert(
 
     # Step 2: Build feature vector
     feature_vector = generate_feature_vector(extracted)
+
+    feature_vector = scaler.transform(feature_vector)
 
     # Step 3: Get probabilities
     probabilities = rf_model.predict_proba(feature_vector)[0]
